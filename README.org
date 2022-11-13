@@ -1,5 +1,5 @@
 * Setting up
-Instructions and code will be made available shortly.
+This repository holds the code for
 * Requirements
 You need to have a working =MATLAB= installation.
 ** dotenv
@@ -35,5 +35,9 @@ Then make sure to add this directory to your path in =MATLAB=:
 addpath(fullfile(dotenv.read().SRC_DIR, 'fastdmf', 'matlab'))
 savepath()
 #+END_SRC
-
+** Statistics and Machine Learning Toolbox
+To add =Statistics and Machine Learning Toolbox= to your =MATLAB= installation,
+open the add-on explorer and search for =Statistics and Machine Learning
+Toolbox=, click on the right search result, and click on =Install= (or =Sign in
+to install= if not already signed in).
 
