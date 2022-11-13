@@ -13,10 +13,19 @@ DATA_DIR=/path/to/this/directory/data/ # in which data is stored
 SRC_DIR=/path/to/src/directory # path to which you want to install additional packages (mine is /home/paul/src)
 #+END_EXAMPLE
 
-then install [[https://nl.mathworks.com/matlabcentral/fileexchange/108029-matlab-dotenv][=matlab-dotenv=]] by running the following in a =MATLAB= shell:
+then install [[https://nl.mathworks.com/matlabcentral/fileexchange/108029-matlab-dotenv][matlab-dotenv]] by running the following in a =MATLAB= shell:
 #+BEGIN_SRC matlab
 eval(webread('https://raw.githubusercontent.com/roslovets/matlab-dotenv/main/installer/installweb.m'))
 #+END_SRC
+This now allows you to access any variables defined in =.env= as follows:
+#+BEGIN_SRC matlab :results output
+dotenv.read().SRC_DIR
+#+END_SRC
+
+#+RESULTS:
+: /home/paul/src
+
+
 ** fastdmf
 This repository uses the [[https://gitlab.com/concog/fastdmf][fastdmf]] package. To install, run (starting from this
 directory):
