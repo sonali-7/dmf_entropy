@@ -1,9 +1,8 @@
 %% Running DMF with and without neuromodulation
-
-basefold = '/media/ruben/ssd240/Matlab/cb-neuromod-master/';
-load([basefold,'fc_fcd_bold_sig_pcb_lsd.mat'],'fcd','fc','tr','flp','fhi',...
+PARAMETERS_DIR = fullfile(dotenv.read().PROJECT_DIR, 'parameters')
+load(fullfile(PARAMETERS_DIR ,'fc_fcd_bold_sig_pcb_lsd.mat'),'fcd','fc','tr','flp','fhi',...
     'wsize','overlap','condnames','sel_conds')
-load('SC_and_5ht2a_receptors.mat')
+load(fullfile(PARAMETERS_DIR, 'SC_and_5ht2a_receptors.mat'))
 C = sc90./max(sc90(:))*0.2;
 stren = sum(C)./2;
 nsubs = size(fc,3);

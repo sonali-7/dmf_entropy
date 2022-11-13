@@ -1,5 +1,5 @@
 %% New SciRep Paper fig # 1A
-load('SC_and_5ht2a_receptors.mat')
+load(fullfile(dotenv.read().PROJECT_DIR, 'parameters', 'SC_and_5ht2a_receptors.mat'))
 C = sc90./max(sc90(:))*0.2;
 stren = sum(C)./2;
 N = length(C);
@@ -16,7 +16,7 @@ params.receptors = receptors;
 params.lrj = 0;
 params.taoj = Inf;
 params.G = selG;
-params.J = sel_alpha*params.G*stren' + 1; % updates 
+params.J = sel_alpha*params.G*stren' + 1; % updates
 params.seed = 1;
 gamma_ent_fun = @(a) a(1) + log(a(2)) + log(gamma(a(1))) + (1-a(1))*psi(a(1));
 %% Running model
@@ -44,10 +44,10 @@ tend = 20000;
 xx_fr = (tini:tend)*params.dt/1000;
 xx_fr = xx_fr - min(xx_fr);
 figure
-for i=1:4    
-    
+for i=1:4
+
     subplot(4,2,2*i-1)
-    plot(xx_fr,rates(sel_nodes_id(i),tini:tend),'color',[0 0 0.75])    
+    plot(xx_fr,rates(sel_nodes_id(i),tini:tend),'color',[0 0 0.75])
     set(gca,'xtick',0:0.25:1)
     if i<4
         set(gca,'xticklabel','')
@@ -58,8 +58,8 @@ for i=1:4
     ylim([0 15])
     xlim([0 max(xx_fr)])
     box off
-    
-    
+
+
     gpdf = gampdf(xx,gamma_pars(1,sel_nodes_id(i)),gamma_pars(2,sel_nodes_id(i)));
     subplot(4,2,2*i)
     p1=plot(xx,gpdf,'linewidth',3,'color',[0 0 0.4]);hold on
