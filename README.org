@@ -1,2 +1,39 @@
 * Setting up
 Instructions and code will be made available shortly.
+* Requirements
+You need to have a working =MATLAB= installation.
+** dotenv
+This repository uses a =.env= file, in which variables specific to the machine
+are stored. Add a =.env= file in the root directory of the project (i.e. the
+same directory in which the =README= is located), and define the following
+variables:
+#+BEGIN_EXAMPLE sh
+PROJECT_DIR=/path/to/this/directory/
+DATA_DIR=/path/to/this/directory/data/ # in which data is stored
+SRC_DIR=/path/to/src/directory # path to which you want to install additional packages (mine is /home/paul/src)
+#+END_EXAMPLE
+
+then install [[https://nl.mathworks.com/matlabcentral/fileexchange/108029-matlab-dotenv][=matlab-dotenv=]] by running the following in a =MATLAB= shell:
+#+BEGIN_SRC matlab
+eval(webread('https://raw.githubusercontent.com/roslovets/matlab-dotenv/main/installer/installweb.m'))
+#+END_SRC
+** fastdmf
+This repository uses the [[https://gitlab.com/concog/fastdmf][fastdmf]] package. See [[https://gitlab.com/concog/fastdmf#usage-in-python][here]] for installation
+instructions.
+#+BEGIN_SRC sh
+source .env
+cd $SRC_DIR
+git clone https://gitlab.com/concog/fastdmf
+#+END_SRC sh
+And to install the dmf package:
+#+BEGIN_SRC sh
+cd fastdmf/matlab
+mex COPTIMFLAGS="-O3" DMF.cpp
+#+END_SRC
+Then make sure to add this directory to your path in =MATLAB=:
+#+BEGIN_SRC matlab
+addpath([char(dotenv.read().SRC_DIR), '/fastdmf/matlab'])
+savepath()
+#+END_SRC
+
+
