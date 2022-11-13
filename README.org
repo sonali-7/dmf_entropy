@@ -18,8 +18,8 @@ then install [[https://nl.mathworks.com/matlabcentral/fileexchange/108029-matlab
 eval(webread('https://raw.githubusercontent.com/roslovets/matlab-dotenv/main/installer/installweb.m'))
 #+END_SRC
 ** fastdmf
-This repository uses the [[https://gitlab.com/concog/fastdmf][fastdmf]] package. See [[https://gitlab.com/concog/fastdmf#usage-in-python][here]] for installation
-instructions.
+This repository uses the [[https://gitlab.com/concog/fastdmf][fastdmf]] package. To install, run (starting from this
+directory):
 #+BEGIN_SRC sh
 source .env
 cd $SRC_DIR
@@ -32,7 +32,7 @@ mex COPTIMFLAGS="-O3" DMF.cpp
 #+END_SRC
 Then make sure to add this directory to your path in =MATLAB=:
 #+BEGIN_SRC matlab
-addpath([char(dotenv.read().SRC_DIR), '/fastdmf/matlab'])
+addpath(fullfile(dotenv.read().SRC_DIR, 'fastdmf', 'matlab'))
 savepath()
 #+END_SRC
 
