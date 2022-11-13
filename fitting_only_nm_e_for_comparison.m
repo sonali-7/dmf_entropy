@@ -1,9 +1,10 @@
 %% Running DMF with and without neuromodulation
 % basefold = '/media/ruben/ssd240/Matlab/cb-neuromod-master/';
 basefold = 'E:\Matlab\cb-neuromod-master\';
-load([basefold,'fc_fcd_bold_sig_pcb_lsd.mat'],'fcd','fc','tr','flp','fhi',...
+PARAMETERS_DIR=fullfile(dotenv.read().PROJECT_DIR, 'parameters')
+load(fullfile(PARAMETERS_DIR,'fc_fcd_bold_sig_pcb_lsd.mat'),'fcd','fc','tr','flp','fhi',...
     'wsize','overlap','condnames','sel_conds')
-load('SC_and_5ht2a_receptors.mat')
+load(fullfile(PARAMETERS_DIR,'SC_and_5ht2a_receptors.mat'))
 C = sc90./max(sc90(:))*0.2;
 stren = sum(C)./2;
 nsubs = size(fc,3);
@@ -32,25 +33,25 @@ for c=1:nconds
     aux_fc_corr_per_sub = aux_fcd_ks_per_sub;
     vec_fc = squareform(ave_fc(:,:,c) - eye(N));
     for s=1:nsubs
-        
+
         aux_fc = squareform(fc(:,:,s,c) - eye(N));
         emp_sc_fc_corr(s,c) = corr2(aux_fc,vec_sc);
         aux_fcd = squareform(this_fcd(:,:,s) - eye(nwins));
-        
+
         [~,~,fcd_ks_2_all(s,c)] = kstest2(reshape(this_fcd(:,:,s),[numel(this_fcd(:,:,s)),1]),this_fcd(:));
 %         fc_corr_2_all(s,c) = corr2(fc(:,:,s,c),ave_fc(:,:,c));
         fc_corr_2_all(s,c) = mean((aux_fc-vec_fc).^2); % MSE FC
-        
-        
+
+
         for s2=s:nsubs
             aux_fc2 = squareform(fc(:,:,s2,c) - eye(N));
 %             aux_fc_corr_per_sub(s,s2) = corr2(aux_fc(:),aux_fc2(:));
             aux_fc_corr_per_sub(s,s2) = mean((aux_fc(:)-aux_fc2(:)).^2); % MSE FC
-            
+
             aux_fcd2 = squareform(this_fcd(:,:,s2) - eye(nwins));
             [~,~,aux_fcd_ks_per_sub(s,s2)] = kstest2(aux_fcd(:),aux_fcd2(:));
         end
-        
+
     end
     isub_sub = find(triu(ones(nsubs),1));
     fc_corr_per_sub{c} = aux_fc_corr_per_sub(isub_sub);
@@ -133,7 +134,7 @@ Xtable = table(xx(:),yy(:),'VariableNames',par_names);
 [this_objective,this_sigma] = predictObjective(BayesoptResults,Xtable);
 this_objective = reshape(this_objective,[nxx,nxx]);
 
-    
+
 %%
 cmap = flipud(othercolor('YlGnBu5',256));
 figfold = '/media/ruben/ssd240/Matlab/fastdmf-master/newSciRep/figures/';
@@ -218,7 +219,7 @@ title('Brain Average E Entropy (Hz)')
 %
 print(gcf,'-dpng',[figfold,figname,'.png'],'-r300')
 print(gcf,'-dpdf',[figfold,figname,'.pdf'],'-r300')
-%% Running simulation at minimum to check ks vals for PCB 
+%% Running simulation at minimum to check ks vals for PCB
 gamma_ent_fun = @(a) a(1) + log(a(2)) + log(gamma(a(1))) + (1-a(1))*psi(a(1));
 nreps = 60;
 selG = 2.42;
@@ -251,9 +252,9 @@ parfor r=1:nreps
     [rates,bold] = dyn_fic_DMF(selpars, nsteps,'both'); % runs simulation
     rates = rates(:,(selpars.burnout*1000*2):end);
     reg_fr(:,r) = mean(rates,2);
-    for n=1:N        
+    for n=1:N
         gamma_pars = gamfit(rates(n,:));
-        reg_ent(n,r) = gamma_ent_fun(gamma_pars);        
+        reg_ent(n,r) = gamma_ent_fun(gamma_pars);
     end
     bold = bold(:,selpars.burnout:end); % remove initial transient
     bold(isnan(bold))=0;
@@ -265,26 +266,26 @@ parfor r=1:nreps
     sim_fcd = compute_fcd(filt_bold,selpars.wsize,selpars.overlap,isubfc);
     sim_fcd(isnan(sim_fcd))=0;
     sim_fcd = corrcoef(sim_fcd);
-    
+
     aux_ks_fcd = zeros(nconds,1);
-    
+
     for c=1:nconds
         this_fc = ave_fc(:,:,c);
         this_fcd= fcd(:,:,:,c);
         % Computing FC error: 1-Corrrelation between FC's
         sel_fc_mse(r,c) = mean((sim_fc(isubfc)-this_fc(isubfc)).^2); % MSE FC
-        
+
         % Computing KS FCD for each condition and MSE on FC
         [~,~,aux_ks_fcd(c)] = kstest2(sim_fcd(:),this_fcd(:));
     end
     bold_sigs{r} = filt_bold;
-    sel_ks_fcd(r,:) = aux_ks_fcd;    
-    
+    sel_ks_fcd(r,:) = aux_ks_fcd;
+
     endtime=toc(initic);
     disp(['Simulation ',num2str(r),', PCB K-S = ',num2str(aux_ks_fcd(1)),...
         ', LSD K-S = ',num2str(aux_ks_fcd(2)),'. Time = ',num2str(endtime),' seconds'])
-    
-    
+
+
 end
 toc(init1)
 %
@@ -311,7 +312,7 @@ selG = 2.4;
 sel_alpha = 1.5;
 
 thispars.G = selG;
-thispars.J = sel_alpha*thispars.G*stren' + 1; % 
+thispars.J = sel_alpha*thispars.G*stren' + 1; %
 G = [];
 nm_e = [0 0.2];
 nm_i = [0 0.2];
@@ -347,7 +348,7 @@ sel_alpha = 1.5;
 figfold = 'E:\Matlab\fastdmf-master\newSciRep\';
 figname = ['bayeopt_objfunc_nm_e_nm_i_G_',num2str(selG),...
     '_alpha_',num2str(sel_alpha)];
-    
+
 kslims = [0 0.7];
 kslevels = linspace(kslims(1),kslims(2),11);
 
@@ -416,7 +417,7 @@ params.receptors = receptors;
 params.lrj = 0;
 params.taoj = Inf;
 params.G = selG;
-params.J = sel_alpha*params.G*stren' + 1; % updates 
+params.J = sel_alpha*params.G*stren' + 1; % updates
 
 % Creating parameters for simulations
 nmods = 2;
@@ -427,12 +428,12 @@ for m=1:nmods
     thispars = params;
     thispars.wgaine = sel_wgaine(m);
     thispars.wgaini = sel_wgaini(m);
-    for r=1:nreps        
+    for r=1:nreps
         thispars.seed = iniconds(r);
         parlist{m,r} = thispars;
     end
 end
-%    
+%
 
 gamma_ent_fun = @(a) a(1) + log(a(2)) + log(gamma(a(1))) + (1-a(1))*psi(a(1));
 
@@ -473,27 +474,27 @@ for m=1:nmods
         sim_fcd = compute_fcd(filt_bold,selpars.wsize,selpars.overlap,isubfc);
         sim_fcd(isnan(sim_fcd))=0;
         sim_fcd = corrcoef(sim_fcd);
-        
+
         aux_ks_fcd = zeros(nconds,1);
-        
+
         for c=1:nconds
             this_fc = ave_fc(:,:,c);
             this_fcd= fcd(:,:,:,c);
             % Computing FC error: 1-Corrrelation between FC's
             sel_fc_mse(r,c,m) = mean((sim_fc(isubfc)-this_fc(isubfc)).^2); % MSE FC
-            
+
             % Computing KS FCD for each condition and MSE on FC
             [~,~,aux_ks_fcd(c)] = kstest2(sim_fcd(:),this_fcd(:));
         end
         bold_sigs{r,m} = filt_bold;
         sel_ks_fcd(r,:,m) = aux_ks_fcd;
-        
+
         endtime=toc(initic);
 %         disp(['model = ',condnames{m}])
 %         disp(['Simulation ',num2str(r),', PCB K-S = ',num2str(aux_ks_fcd(1)),...
 %             ', LSD K-S = ',num2str(aux_ks_fcd(2)),'. Time = ',num2str(endtime),' seconds'])
-        
-        
+
+
     end
 end
 toc(init1)
@@ -605,7 +606,7 @@ bo_opts = {'IsObjectiveDeterministic',false,'UseParallel',true,...
 sel_alpha = 1.49;
 thispars = params;
 thispars.G = 2.42;
-thispars.J = sel_alpha*thispars.G*stren' + 1; % 
+thispars.J = sel_alpha*thispars.G*stren' + 1; %
 
 G = [];
 fic_alpha = [];
@@ -654,9 +655,9 @@ parfor r=1:nreps
     [rates,bold] = dyn_fic_DMF(selpars, nsteps,'both'); % runs simulation
     rates = rates(:,(selpars.burnout*1000*2):end);
     reg_fr(:,r) = mean(rates,2);
-    for n=1:N        
+    for n=1:N
         gamma_pars = gamfit(rates(n,:));
-        reg_ent(n,r) = gamma_ent_fun(gamma_pars);        
+        reg_ent(n,r) = gamma_ent_fun(gamma_pars);
     end
     bold = bold(:,selpars.burnout:end); % remove initial transient
     bold(isnan(bold))=0;
@@ -668,26 +669,26 @@ parfor r=1:nreps
     sim_fcd = compute_fcd(filt_bold,selpars.wsize,selpars.overlap,isubfc);
     sim_fcd(isnan(sim_fcd))=0;
     sim_fcd = corrcoef(sim_fcd);
-    
+
     aux_ks_fcd = zeros(nconds,1);
-    
+
     for c=1:nconds
         this_fc = ave_fc(:,:,c);
         this_fcd= fcd(:,:,:,c);
         % Computing FC error: 1-Corrrelation between FC's
         sel_fc_mse(r,c) = mean((sim_fc(isubfc)-this_fc(isubfc)).^2); % MSE FC
-        
+
         % Computing KS FCD for each condition and MSE on FC
         [~,~,aux_ks_fcd(c)] = kstest2(sim_fcd(:),this_fcd(:));
     end
     bold_sigs{r} = filt_bold;
-    sel_ks_fcd(r,:) = aux_ks_fcd;    
-    
+    sel_ks_fcd(r,:) = aux_ks_fcd;
+
     endtime=toc(initic);
     disp(['Simulation ',num2str(r),', PCB K-S = ',num2str(aux_ks_fcd(1)),...
         ', LSD K-S = ',num2str(aux_ks_fcd(2)),'. Time = ',num2str(endtime),' seconds'])
-    
-    
+
+
 end
 toc(init1)
 %
@@ -769,7 +770,7 @@ print(gcf,'-dpng',[figfold,figname,'.png'],'-r300')
 print(gcf,'-dpdf',[figfold,figname,'.pdf'],'-r300')
 
 
-%% Running simulation at minimum to check ks vals for PCB 
+%% Running simulation at minimum to check ks vals for PCB
 gamma_ent_fun = @(a) a(1) + log(a(2)) + log(gamma(a(1))) + (1-a(1))*psi(a(1));
 nreps = 90;
 selG = 2.5;
@@ -800,9 +801,9 @@ parfor r=1:nreps
     [rates,bold] = dyn_fic_DMF(selpars, nsteps,'both'); % runs simulation
     rates = rates(:,(selpars.burnout*1000*2):end);
     reg_fr(:,r) = mean(rates,2);
-    for n=1:N        
+    for n=1:N
         gamma_pars = gamfit(rates(n,:));
-        reg_ent(n,r) = gamma_ent_fun(gamma_pars);        
+        reg_ent(n,r) = gamma_ent_fun(gamma_pars);
     end
     bold = bold(:,selpars.burnout:end); % remove initial transient
     bold(isnan(bold))=0;
@@ -814,26 +815,26 @@ parfor r=1:nreps
     sim_fcd = compute_fcd(filt_bold,selpars.wsize,selpars.overlap,isubfc);
     sim_fcd(isnan(sim_fcd))=0;
     sim_fcd = corrcoef(sim_fcd);
-    
+
     aux_ks_fcd = zeros(nconds,1);
-    
+
     for c=1:nconds
         this_fc = ave_fc(:,:,c);
         this_fcd= fcd(:,:,:,c);
         % Computing FC error: 1-Corrrelation between FC's
         sel_fc_mse(r,c) = mean((sim_fc(isubfc)-this_fc(isubfc)).^2); % MSE FC
-        
+
         % Computing KS FCD for each condition and MSE on FC
         [~,~,aux_ks_fcd(c)] = kstest2(sim_fcd(:),this_fcd(:));
     end
     bold_sigs{r} = filt_bold;
-    sel_ks_fcd(r,:) = aux_ks_fcd;    
-    
+    sel_ks_fcd(r,:) = aux_ks_fcd;
+
     endtime=toc(initic);
     disp(['Simulation ',num2str(r),', PCB K-S = ',num2str(aux_ks_fcd(1)),...
         ', LSD K-S = ',num2str(aux_ks_fcd(2)),'. Time = ',num2str(endtime),' seconds'])
-    
-    
+
+
 end
 toc(init1)
 %

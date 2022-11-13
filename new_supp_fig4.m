@@ -1,10 +1,11 @@
 %% New supplementary figure 4 SciRep: Receptor controls
-load('SC_and_5ht2a_receptors.mat')
+PARAMETERS_DIR=dotenv.read().PROJECT_DIR, 'parameters'
+load(fullfile(PARAMETERS_DIR, 'SC_and_5ht2a_receptors.mat'))
 C = sc90./max(sc90(:))*0.2;
 N= length(C);
 stren = sum(C)./2;
 basefold = '/media/ruben/ssd240/Matlab/cb-neuromod-master/';
-load([basefold,'fc_fcd_bold_sig_pcb_lsd.mat'],'fcd','fc','tr','flp','fhi',...
+load([PARAMETERS_DIR,'fc_fcd_bold_sig_pcb_lsd.mat'],'fcd','fc','tr','flp','fhi',...
     'wsize','overlap','condnames','sel_conds')
 ave_fc = squeeze(mean(fc,3));
 vec_sc = squareform(C);
@@ -59,7 +60,7 @@ parfor r=1:nreps
     for m=1:nmaps
         selpars = parlist{m,r};
         % Simulating
-        
+
         [rates,bold] = dyn_fic_DMF(selpars, nsteps,'both'); % runs simulation
         rates = rates(:,(selpars.burnout*1000*2):end);
         reg_fr(:,r,m) = mean(rates,2);
@@ -77,15 +78,15 @@ parfor r=1:nreps
         sim_fcd = compute_fcd(filt_bold,selpars.wsize,selpars.overlap,isubfc);
         sim_fcd(isnan(sim_fcd))=0;
         sim_fcd = corrcoef(sim_fcd);
-        
+
         aux_ks_fcd = zeros(nconds,1);
-        
+
         for c=1:nconds
             this_fc = ave_fc(:,:,c);
             this_fcd= fcd(:,:,:,c);
             % Computing FC error: 1-Corrrelation between FC's
             sel_fc_mse(r,m) = mean((sim_fc(isubfc)-this_fc(isubfc)).^2); % MSE FC
-            
+
             % Computing KS FCD for each condition and MSE on FC
             [~,~,aux_ks_fcd(c)] = kstest2(sim_fcd(:),this_fcd(:));
         end
@@ -131,20 +132,20 @@ for m=1:nmaps
         ylabel('NM entropy')
     end
     legend('2A',map_name{m},'location','northwest')
-    
+
 end
 %
 print(gcf,'-dpdf',[figfold,'receptors_maps_vs_entropy.pdf'],'-r300')
 
-%% 
+%%
 figure('units','normalized','outerposition',[0 0 1 1],'PaperOrientation','landscape','visible','on');
 
 for m=1:nmaps
-    subplot(2,3,m)    
+    subplot(2,3,m)
     plot(stren,mean_dh_2a,'k.','markersize',msize);hold on
     plot(stren,mean_dh(:,m),'r.','markersize',msize);hold on
     xlim([0.1 0.5])
-    
+
     title(map_name{m})
     grid on
     if m>3
@@ -154,7 +155,7 @@ for m=1:nmaps
         ylabel('\Delta H')
     end
     legend('2A',map_name{m},'location','northwest')
-    
+
 end
 print(gcf,'-dpdf',[figfold,'receptors_maps_vs_stren_vs_dh.pdf'],'-r300')
 %% Plotting KS-FCD for receptors

@@ -2,6 +2,7 @@
 % Centrality measures vs Delta H
 
 basefold = '/media/ruben/ssd240/Matlab/fastdmf-master/newSciRep/';
+load(fullfile(dotenv.read().PROJECT_DIR, 'parameters', 'SC_and_5ht2a_receptors.mat'))
 filename = 'dmf_pcb_lsd_nm_i_v5.mat';
 load('Deco90_Core_IgProfile.mat', 'core')
 k_core = core;
@@ -18,8 +19,8 @@ mean_lsd = mean(lsd,2);
 std_lsd = std(lsd,0,2);
 std_pla= std(pla,0,2);
 delta_h = (lsd - pla)./pla;
-mean_delta_h = mean(delta_h,2); 
-std_delta_h = std(delta_h,0,2); 
+mean_delta_h = mean(delta_h,2);
+std_delta_h = std(delta_h,0,2);
 %% Centrality measures
 sc90 = sc90./max(sc90(:))*0.2;
 stren = sum(sc90)./2;
